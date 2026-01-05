@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeƒrame v1.0.0 | Iconic Logic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --electric-green: #22c55e; --void-red: #ef4444; }
+        body { background-color: #050810; font-family: 'Space Grotesk', sans-serif; color: white; overflow-x: hidden; }
+        .header-font { font-family: 'Syncopate', sans-serif; }
+        .glow-text { color: var(--electric-green); text-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
+        .glass-panel { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0; }
+        .green-border-glow { border-left: 4px solid var(--electric-green); box-shadow: -10px 0 30px rgba(34, 197, 94, 0.15); }
+        .input-focus:focus { border-bottom: 2px solid var(--electric-green); transition: all 0.5s ease; }
+        select { background-color: white !important; color: black !important; font-weight: 900; }
+        .task-completed { opacity: 0.25; filter: grayscale(1); }
+    </style>
+</head>
+<body>
+
+    <div id="loader" class="fixed inset-0 z-[100] bg-[#050810] flex items-center justify-center p-12">
+        <div class="w-full max-w-4xl text-center">
+            <div class="header-font text-4xl md:text-7xl mb-8 tracking-[0.5em] glow-text font-bold uppercase">TIMEƒRAME</div>
+            <div class="w-full h-[2px] bg-slate-900 relative">
+                <div id="progress" class="absolute inset-0 bg-green-500 w-0 shadow-[0_0_15px_#22c55e]"></div>
+            </div>
+            <div class="mt-6 text-[10px] tracking-[1em] text-slate-600 uppercase">Fetching_Cloud_Data</div>
+        </div>
+    </div>
+
+    <main class="p-8 md:p-16 max-w-screen-2xl mx-auto">
+        
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-32 reveal" style="opacity:0;">
+            <div>
+                <h1 class="header-font text-5xl md:text-7xl font-bold tracking-tighter glow-text uppercase">TIME<span class="text-white uppercase">ƒ</span>RAME</h1>
+                <p class="text-xs md:text-sm text-slate-400 uppercase tracking-[0.4em] mt-6 font-bold">Quantifying urgency. Defining impact.</p>
+            </div>
+            
+            <div class="mt-8 md:mt-0 flex flex-col items-end gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Identity: {{ session['username'] }}</span>
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                </div>
+                <div class="flex gap-4">
+                    <a href="/logout" class="text-[10px] font-black border border-red-900/50 text-red-500 px-6 py-2 hover:bg-red-500 hover:text-white transition-all duration-300 tracking-widest uppercase">
+                        Terminate_Session
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section class="mb-40 reveal" style="opacity:0;">
+            <form action="/add" method="POST" class="flex flex-col lg:flex-row gap-16 items-end">
+                <div class="flex-1 w-full">
+                    <label class="text-[11px] text-green-500 font-black tracking-[0.4em] mb-6 block uppercase">Identify_Target_Objective</label>
+                    <input type="text" name="task_name" placeholder="INITIATE_TASK_ENTRY" 
+                           class="w-full bg-transparent border-b border-slate-800 py-6 text-4xl font-light outline-none input-focus uppercase tracking-widest" required>
+                </div>
+                <div class="flex gap-4 w-full lg:w-auto">
+                    <div>
+                        <label class="text-[9px] text-slate-600 mb-2 block font-bold uppercase">Urgency</label>
+                        <select name="urgency" class="px-6 py-4 text-[10px] uppercase outline-none">
+                            <option value="urgent">Urgent</option>
+                            <option value="not_urgent">Not Urgent</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-600 mb-2 block font-bold uppercase">Importance</label>
+                        <select name="importance" class="px-6 py-4 text-[10px] uppercase outline-none">
+                            <option value="important">Important</option>
+                            <option value="not_important">Not Important</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="self-end bg-white text-black px-10 py-4 font-black text-[11px] tracking-[0.3em] hover:bg-green-500 transition-all duration-500 uppercase">Sync</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for label, code, desc, glow in [
+                ('NOW', 'Q1', 'Urgent & Important', 'green-border-glow'), 
+                ('NEXT', 'Q2', 'Important/Not Urgent', ''), 
+                ('QUEUE', 'Q3', 'Urgent/Not Important', ''), 
+                ('VOID', 'Q4', 'Not Urgent/Not Important', '')
+            ] %}
+            <div class="glass-panel p-10 {{ glow }} reveal-task">
+                <h3 class="header-font text-sm tracking-[0.3em] font-bold mb-4 {% if code == 'Q1' %}text-green-500{% else %}text-slate-500{% endif %}">{{ label }}</h3>
+                <p class="text-[8px] text-slate-700 tracking-[0.2em] uppercase font-bold mb-12">{{ desc }}</p>
+                
+                <div class="space-y-8">
+                    {% for task in tasks if task.category == code %}
+                    <div class="task-glide border-b border-slate-900 pb-6 flex justify-between items-center group opacity-0 {% if task.status == 'completed' %}task-completed{% endif %}">
+                        <div class="flex-1 pr-4">
+                            <span class="text-lg font-bold tracking-wider block mb-2 uppercase {% if task.status == 'completed' %}line-through text-slate-600{% endif %}">
+                                {{ task.name }}
+                            </span>
+                            <span class="text-[9px] font-black text-slate-700 tracking-widest uppercase">Status: {{ task.status }}</span>
+                        </div>
+                        
+                        <div class="flex gap-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
+                            {% if task.status == 'pending' %}
+                            <a href="/complete/{{ task.id }}" class="text-green-500 hover:text-white transition-colors" title="Complete_Task">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </a>
+                            {% endif %}
+                            <a href="/delete/{{ task.id }}" class="text-red-900 hover:text-red-500 transition-colors" title="Delete_Task">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        window.onload = () => {
+            const tl = gsap.timeline();
+            tl.to("#progress", { width: "100%", duration: 2, ease: "power4.inOut" })
+              .to("#loader", { opacity: 0, duration: 0.8, onComplete: () => document.getElementById('loader').style.display = 'none' })
+              .to(".reveal", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out" }, "-=0.3")
+              .to(".glass-panel", { opacity: 1, scaleY: 1, duration: 1, stagger: 0.1, ease: "expo.out" }, "-=0.5")
+              .to(".task-glide", { opacity: 1, x: 0, duration: 0.8, stagger: 0.1, ease: "back.out(1.7)" }, "-=0.5");
+        };
+    </script>
+</body>
+</html>
